@@ -1,3 +1,5 @@
+Some basic information of this operating system :
+
 ![image](https://github.com/Yicheng-Lu-llll/ECE391-operating-system/blob/main/description/paging.jpg)
 
 
