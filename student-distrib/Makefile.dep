@@ -1,0 +1,30 @@
+assembly.o: assembly.S
+boot.o: boot.S multiboot.h x86_desc.h types.h
+page_assembly.o: page_assembly.S
+sys_call.o: sys_call.S
+x86_desc.o: x86_desc.S x86_desc.h types.h
+buddy_sys.o: buddy_sys.c buddy_sys.h lib.h types.h system_call.h \
+  x86_desc.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c x86_desc.h types.h lib.h i8259.h idt.h rtc.h keyboard.h \
+  terminal.h assembly.h sys_call.h system_call.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
+  tests.h rtc.h assembly.h keyboard.h terminal.h page.h systemfile.h \
+  system_call.h pit.h mouse.h sound.h idt.h buddy_sys.h
+keyboard.o: keyboard.c x86_desc.h types.h lib.h i8259.h keyboard.h \
+  terminal.h pit.h systemfile.h sound.h system_call.h idt.h
+lib.o: lib.c lib.h types.h pit.h terminal.h x86_desc.h system_call.h
+mouse.o: mouse.c mouse.h lib.h types.h i8259.h terminal.h
+page.o: page.c x86_desc.h types.h page.h lib.h
+pit.o: pit.c pit.h types.h i8259.h lib.h system_call.h x86_desc.h \
+  systemfile.h terminal.h
+rtc.o: rtc.c rtc.h types.h lib.h i8259.h system_call.h
+sound.o: sound.c sound.h types.h lib.h systemfile.h system_call.h idt.h \
+  i8259.h
+system_call.o: system_call.c systemfile.h types.h system_call.h \
+  x86_desc.h terminal.h page.h lib.h rtc.h pit.h
+systemfile.o: systemfile.c systemfile.h types.h lib.h system_call.h
+terminal.o: terminal.c terminal.h types.h keyboard.h lib.h page.h pit.h \
+  x86_desc.h system_call.h
+tests.o: tests.c systemfile.h types.h tests.h x86_desc.h lib.h i8259.h \
+  idt.h rtc.h terminal.h buddy_sys.h system_call.h

@@ -1,0 +1,94 @@
+/* BUG LOG for CheckPoint 1 */
+
+ML
+BUG 1 2021/3/20 18:53
+file: idt.c
+description: The exception handler cannot be called when the error happen (division error).
+sol1: forget to set the idt[i].present to 1, set and try again. // fixed
+
+ML
+BUG 2 2021/3/21 10:28
+file: keyboard.c
+description: The keyboard handler will be broken when two keys are pressed at the same time.
+sol1: try to find error but I think everything is right.
+sol2: think why it will happen --> cannot find the ascii value --> two keys will lead to a new scan code.
+sol3: add assembly, and the bug is fixed. why?
+sol4: the assembly code increase the time between two scan codes are sent to the OS, the new scan code will not generate. // fixed
+
+
+
+BUG 3 2021/3/21 12:42
+file: page.c
+description: can‘t turn on the page mechanism.
+sol1: in the assembly code, we forget to add $ to a digit. without $,Complier will conisder it as a address
+
+BUG 4 2021/3/21 12:42
+file: boot.S
+description: we can only enable the keyboard interrupt under the condition that we enable the RTC interrupt. Without RTC, ketboard will not work properly.
+sol1: We push EFLAG before call init_IDT and restore EFALG after that. In this case, we will still have IF=0 even we have called the init_IDT. Since IF=0, no interrupts will occur.
+Just delete the "pushfl".
+
+/* BUG LOG for CheckPoint 2 */
+ML
+BUG 1 2021/3/28 21:53
+file: keyboard.c
+description: After the special keys are printed, the keyboard cannot be used.
+sol1: modify the send_eoi function at the top of the keyboard handler. // fixed
+
+
+BUG 2 2021/3/28 18:30
+file:systemfile.c
+description: when doing read data, to check how many data block it obtain, we check whether their index difference, but actually the data block in the block array is randomly organized, so this approach fail.
+sol: instead of using their index difference, we check the difference of the address of these data block, a difference of 32B mean two data block are connect, other like this.
+
+BUG 3 2021/29/23:49
+file:systemfile.c
+description: when doing read data, to copy data from data block to our buffer, we use num_read to track how many data has been read, and finally return num_data as # of data read. While actually we miss the situation that the length need to read is larger than the data has, so sometimes we get wrong.
+sol: first check this situation and if it is true, change the length to read just equal to the left number of data.
+
+
+/* BUG LOG for CheckPoint 3 */
+LYC
+BUG 1 2021/4/12 22:45
+file: system_call.c
+description: When we set the new process's stack , we set it as:  start user address + 4MB. This cause a page fault.
+sol: start user address + 4MB is in the next page directory entry. So, the real bottom should be: start user address + 4MB -4 bytes.
+
+BUG 2 2021/4/12 22:45
+file: system_call.c
+description: We set eip to be byte 24-27 of the user program when we want eip to be next process's first instruction. 
+sol: byte 24-27 stores pointer to the first instruction. So, we should set eip to *(byte 24-27 of the user program)
+
+BUG 3 2021/4/12 22:45
+file: system_call.c
+description: after halting a process, we forget to set PCB_array[pid] to NULL. As a result, we will count the halting process as one of running procrssed.
+sol: just set PCB_array[pid] to NULL in the halt function.
+
+/* BUG LOG for CheckPoint 4 */
+BUG 1 2021/4/15 12:55
+file: systemfile.c
+description: This is a bug left in cp2 in function read data, while at cp2 test, every time we read full 4K data so this is not occur, but appear in cp3 demo sysrr excutable grep as it read 1K data every time. The problem is we did not change the offset after each read.
+
+BUG 2 2021/4/17 16:30
+file: system_call.c
+description: When initialize the new 4K page for veido memory, we wrongly set in DLP so user program cannot reach it, cause page fault
+solution: change the page's user/supervisor to 1
+
+/* BUG LOG for CheckPoint 5 */
+BUG 1 2021/5/2 23:55
+file: halt.c
+description: when runing fish in one shell with other user program, when the user program finish, fish crash and page fault
+solution: this is because at cp4, whenwe only have one terminal, at halt we will turn off the user vedio page when the only user program is finished,
+but at cp5, for example, run fish and ls, ls finish faster and turn off the page in halt when fish is still use it. So we do a check for only all the user 
+program is halted, we will turn off the page.
+
+BUG 2 2021/5/3 10:34
+file: rtc.c
+description: In checkpoint2, we do not virtualize the rtc, and directly do the hardware frequency read or write. So, when multiple terminals are realized, rtc can not work correctly.
+solution: Do the virtualization of rtc. By using the file_position parameter of the rtc type file.
+
+
+BUG 3 2021/5/3 10:37
+file: terminal.c
+description: use only one terminal_read_flag parameter to hold in terminal read funciton. So, terminal read can not be used at three shells at the same time.
+solution: In terminals, set three terminal_read_flag.

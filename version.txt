@@ -1,0 +1,14 @@
+2021/3/20 version 1：
+    1.init and load the IDT and GDT. able to handle the exception.(Version 1 ML     Version 1 LYC)
+
+2021/3/21 version 2:
+    1.finish i8259,keyboard,rtc interupt.(Version 1     ZLH Version 1 ML     Version 2 LYC      Version 1 LYC)
+
+
+2021/3/21 version 3:
+    1.finish paging.
+
+2021/3/29 version 4:
+    1.terminal keyboard rtc
+
+    
