@@ -1,0 +1,61 @@
+bug0:
+    when i add the bar to the scrren, it seems that the player could go in to the bar.
+solution0:
+    since we add the bar, we need to reshape the logical view window. 
+    #define IMAGE_Y_DIM     200-bar_size   /* pixels  
+
+
+
+
+bug1:
+    when i add the bar, it seems that the bar shows the same image with the top of logic view window.
+solution1:
+    this is becasue the base video memory is originally set to 0 and the start address of bar is also one.
+    So, we need to give a offset.
+    #define base_video_memory 0x05a0 (18*320/4)
+
+
+
+bug2:
+    the bar correctly shows the fonts. However, The text is blurry and colorful.
+solution2:
+    ,when moving data from font_data to text_buffer in a  function that change Text to graphics,
+    i use shift (>> <<) to throw alway all other the bits and keep the target bits to the rightmost. The problem is i left some "trash bits" to still be 1.
+    the correct version is: ( ((int)font_unit>> (FONT_WIDTH-x_move-1) )&(1)  )+    color_offset;
+
+
+bug3:
+    Part of the logic view dislocation
+
+
+
+solution3:
+    what i original think is that if we move logic view to right for just one pixel,
+    then, there will have a byte "trash" space between group 1 and group 0. So, when dealing with "changing the planes",
+    we may need an offset of 1 if we move right for certain number of pixel(Not divisible by 4).
+    The above thinking is totaly wrong and causes the dislocation. there do have a byte "trash" space for some cases, but when "changing the planes",
+    we can just use p_offset * plane size as offset. The "trash" space will nerver be visited.
+    
+
+bug4:
+    when i try to change the color in the palette in order to assign different color to background of bar and bar fonts. i also change the color that other things may use.
+solution4：
+    Double the size of the palette and so that nearly every thing can have a unique index of its original color and a index of its translucent color.
+
+
+bug5:
+    when enter `, program will not exit.
+solution5:
+    Using GDB, it seems that tux_thread will never exit by itself. So, i use pthread_cancel to let other thread cancel the tux thread.
+
+
+bug6:
+    when player goes along the edge and eat a fruit, the front will appear but when player moves, background color, wall color, fonts' color will blend together.
+solution6:
+    the problem is that my draw back function can not handle the edge cases. That is, as long as my starting x,y is outside the logic view, my draw back function will fetch some unexpected index from build buffer.
+    So, just add some if to handle all the edge cases.
+
+bug7:
+    when i move to next level, my bar only contains one single color, fonts seem to be disappeared.
+solution7:
+    The reason is that i use the same color list for bar background and bar fonts. And for some certain value of level, My calculation will give the same index for background and fonts.
